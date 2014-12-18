@@ -49,7 +49,7 @@ namespace SharpTox.Core
         private ToxDelegates.CallbackAvatarInfoDelegate _onAvatarInfoCallback;
         #endregion
 
-        internal ToxHandle _tox;
+        private ToxHandle _tox;
         private CancellationTokenSource _cancelTokenSource = new CancellationTokenSource();
 
         private bool _running = false;
@@ -422,19 +422,6 @@ namespace SharpTox.Core
         }
 
         /// <summary>
-        /// Retrieves the recommended/maximum size of the filedata to send with FileSendData.
-        /// </summary>
-        /// <param name="friendNumber"></param>
-        /// <returns></returns>
-        public int FileDataSize(int friendNumber)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().FullName);
-
-            return ToxFunctions.FileDataSize(_tox, friendNumber);
-        }
-
-        /// <summary>
         /// Retrieves the number of bytes left to be sent/received.
         /// </summary>
         /// <param name="friendNumber"></param>
@@ -615,32 +602,6 @@ namespace SharpTox.Core
         }
 
         /// <summary>
-        /// Retrieves a DateTime object of the last time friendNumber was seen online.
-        /// </summary>
-        /// <param name="friendNumber"></param>
-        /// <returns></returns>
-        public DateTime GetLastOnline(int friendNumber)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().FullName);
-
-            return ToxTools.EpochToDateTime((long)ToxFunctions.GetLastOnline(_tox, friendNumber));
-        }
-
-        /// <summary>
-        /// Retrieves the typing status of a friend.
-        /// </summary>
-        /// <param name="friendNumber"></param>
-        /// <returns></returns>
-        public bool GetIsTyping(int friendNumber)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().FullName);
-
-            return ToxFunctions.GetIsTyping(_tox, friendNumber) == 1;
-        }
-
-        /// <summary>
         /// Retrieves the friendNumber associated to the specified public address/id.
         /// </summary>
         /// <param name="id"></param>
@@ -654,24 +615,6 @@ namespace SharpTox.Core
         }
 
         /// <summary>
-        /// Retrieves the status message of a friend.
-        /// </summary>
-        /// <param name="friendNumber"></param>
-        /// <returns></returns>
-        public string GetStatusMessage(int friendNumber)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().FullName);
-
-            int size = ToxFunctions.GetStatusMessageSize(_tox, friendNumber);
-            byte[] status = new byte[size];
-
-            ToxFunctions.GetStatusMessage(_tox, friendNumber, status, status.Length);
-
-            return ToxTools.GetString(status);
-        }
-
-        /// <summary>
         /// Retrieves the amount of friends who are currently online.
         /// </summary>
         /// <returns></returns>
@@ -681,96 +624,6 @@ namespace SharpTox.Core
                 throw new ObjectDisposedException(GetType().FullName);
 
             return (int)ToxFunctions.GetNumOnlineFriends(_tox);
-        }
-
-        /// <summary>
-        /// Retrieves a friend's connection status.
-        /// </summary>
-        /// <param name="friendNumber"></param>
-        /// <returns></returns>
-        public ToxFriendConnectionStatus GetFriendConnectionStatus(int friendNumber)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().FullName);
-
-            return (ToxFriendConnectionStatus)ToxFunctions.GetFriendConnectionStatus(_tox, friendNumber);
-        }
-
-        public bool IsOnline(int friendNumber)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().FullName);
-
-            return GetFriendConnectionStatus(friendNumber) == ToxFriendConnectionStatus.Online;
-        }
-
-        /// <summary>
-        /// Retrieves a friend's public id/address.
-        /// </summary>
-        /// <param name="friendNumber"></param>
-        /// <returns></returns>
-        public ToxKey GetClientId(int friendNumber)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().FullName);
-
-            byte[] address = new byte[ToxConstants.ClientIdSize];
-            ToxFunctions.GetClientID(_tox, friendNumber, address);
-
-            return new ToxKey(ToxKeyType.Public, address);
-        }
-
-        internal ToxUserStatus GetUserStatus(int friendNumber)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().FullName);
-
-            return (ToxUserStatus)ToxFunctions.GetUserStatus(_tox, friendNumber);
-        }
-
-        /// <summary>
-        /// Sets the typing status of this Tox instance.
-        /// </summary>
-        /// <param name="friendNumber"></param>
-        /// <param name="isTyping"></param>
-        /// <returns></returns>
-        public bool SetUserIsTyping(int friendNumber, bool isTyping)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().FullName);
-
-            byte typing = isTyping ? (byte)1 : (byte)0;
-            return ToxFunctions.SetUserIsTyping(_tox, friendNumber, typing) == 0;
-        }
-
-        /// <summary>
-        /// Send a message to a friend.
-        /// </summary>
-        /// <param name="friendNumber"></param>
-        /// <param name="message"></param>
-        /// <returns></returns>
-        public int SendMessage(int friendNumber, string message)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().FullName);
-
-            byte[] bytes = Encoding.UTF8.GetBytes(message);
-            return (int)ToxFunctions.SendMessage(_tox, friendNumber, bytes, bytes.Length);
-        }
-
-        /// <summary>
-        /// Sends an action to a friend.
-        /// </summary>
-        /// <param name="friendNumber"></param>
-        /// <param name="action"></param>
-        /// <returns></returns>
-        public int SendAction(int friendNumber, string action)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().FullName);
-
-            byte[] bytes = Encoding.UTF8.GetBytes(action);
-            return (int)ToxFunctions.SendAction(_tox, friendNumber, bytes, bytes.Length);
         }
 
         /// <summary>
@@ -789,19 +642,6 @@ namespace SharpTox.Core
                 return;
 
             _tox.Dispose();
-        }
-
-        /// <summary>
-        /// Deletes a friend.
-        /// </summary>
-        /// <param name="friendNumber"></param>
-        /// <returns></returns>
-        public bool DeleteFriend(int friendNumber)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().FullName);
-
-            return ToxFunctions.DelFriend(_tox, friendNumber) == 0;
         }
 
         /// <summary>
@@ -954,46 +794,6 @@ namespace SharpTox.Core
                 throw new ObjectDisposedException(GetType().FullName);
 
             ToxFunctions.SetNospam(_tox, nospam);
-        }
-
-        /// <summary>
-        /// Sends a lossy packet to the specified friendNumber.
-        /// </summary>
-        /// <param name="friendNumber"></param>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        public bool SendLossyPacket(int friendNumber, byte[] data)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().FullName);
-
-            if (data.Length > ToxConstants.MaxCustomPacketSize)
-                throw new ArgumentException("Packet size is bigger than ToxConstants.MaxCustomPacketSize");
-
-            if (data[0] < 200 || data[0] > 254)
-                throw new ArgumentException("First byte of data is not in the 200-254 range.");
-
-            return ToxFunctions.SendLossyPacket(_tox, friendNumber, data, (uint)data.Length) == 0;
-        }
-
-        /// <summary>
-        /// Sends a lossless packet to the specified friendNumber.
-        /// </summary>
-        /// <param name="friendNumber"></param>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        public bool SendLosslessPacket(int friendNumber, byte[] data)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().FullName);
-
-            if (data.Length > ToxConstants.MaxCustomPacketSize)
-                throw new ArgumentException("Packet size is bigger than ToxConstants.MaxCustomPacketSize");
-
-            if (data[0] < 160 || data[0] > 191)
-                throw new ArgumentException("First byte of data is not in the 160-191 range.");
-
-            return ToxFunctions.SendLosslessPacket(_tox, friendNumber, data, (uint)data.Length) == 0;
         }
 
         /// <summary>
@@ -1199,45 +999,6 @@ namespace SharpTox.Core
                 return new byte[0];
 
             return hash;
-        }
-
-        /// <summary>
-        /// Requests avatar info from a friend.
-        /// </summary>
-        /// <param name="friendNumber"></param>
-        /// <returns></returns>
-        public bool RequestAvatarInfo(int friendNumber)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().FullName);
-
-            return ToxFunctions.RequestAvatarInfo(_tox, friendNumber) == 0;
-        }
-
-        /// <summary>
-        /// Requests avatar data from a friend.
-        /// </summary>
-        /// <param name="friendNumber"></param>
-        /// <returns></returns>
-        public bool RequestAvatarData(int friendNumber)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().FullName);
-
-            return ToxFunctions.RequestAvatarData(_tox, friendNumber) == 0;
-        }
-
-        /// <summary>
-        /// Sends avatar info to a friend.
-        /// </summary>
-        /// <param name="friendNumber"></param>
-        /// <returns></returns>
-        public bool SendAvatarInfo(int friendNumber)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().FullName);
-
-            return ToxFunctions.SendAvatarInfo(_tox, friendNumber) == 0;
         }
 
         /// <summary>
