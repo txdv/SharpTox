@@ -55,27 +55,32 @@ namespace SharpTox.Core
             return Tox.GetClientId(Number);
         }
 
-        public bool SetUserIsTyping(bool isTyping)
-        {
-            return Tox.SetUserIsTyping(Number, isTyping);
-        }
-
-        public bool GetIsTyping()
-        {
-            return Tox.GetIsTyping(Number);
-        }
-
         public bool IsTyping
         {
             get
             {
-                return GetIsTyping();
+                return Tox.GetIsTyping(Number);
+            }
+        }
+
+        // TODO: Currently this is not save, since FriendFromFriendNumber
+        // always returns a new instance
+        private bool userIsTyping;
+        public bool UserIsTyping
+        {
+            get
+            {
+                return userIsTyping;
             }
             set
             {
-                if (!SetUserIsTyping (value))
+                if (!Tox.SetUserIsTyping(Number, value))
                 {
-                    throw new Exception ("Couldn't set isTyping for " + Number);
+                    throw new Exception("Couldn't set isTyping for " + Number);
+                }
+                else
+                {
+                    userIsTyping = value;
                 }
             }
         }
@@ -91,4 +96,3 @@ namespace SharpTox.Core
         }
     }
 }
-
