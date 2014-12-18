@@ -1340,6 +1340,11 @@ namespace SharpTox.Core
             return new ToxKey(ToxKeyType.Public, key);
         }
 
+        private ToxFriend FriendFromFriendNumber(int friendNumber)
+        {
+            return new ToxFriend(this, friendNumber);
+        }
+
         #region Events
         private EventHandler<ToxEventArgs.FriendRequestEventArgs> _onFriendRequest;
 
@@ -1373,11 +1378,6 @@ namespace SharpTox.Core
 
                 _onFriendRequest -= value;
             }
-        }
-
-        private ToxFriend FriendFromFriendNumber(int friendNumber)
-        {
-            return new ToxFriend(this, friendNumber);
         }
 
         private EventHandler<ToxEventArgs.ConnectionStatusEventArgs> _onConnectionStatusChanged;
