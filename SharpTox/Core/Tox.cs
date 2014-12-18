@@ -720,12 +720,7 @@ namespace SharpTox.Core
             return new ToxKey(ToxKeyType.Public, address);
         }
 
-        /// <summary>
-        /// Retrieves a friend's current user status.
-        /// </summary>
-        /// <param name="friendNumber"></param>
-        /// <returns></returns>
-        public ToxUserStatus GetUserStatus(int friendNumber)
+        internal ToxUserStatus GetUserStatus(int friendNumber)
         {
             if (_disposed)
                 throw new ObjectDisposedException(GetType().FullName);

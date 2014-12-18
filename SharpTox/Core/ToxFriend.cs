@@ -33,6 +33,10 @@ namespace SharpTox.Core
             }
         }
 
+        /// <summary>
+        /// Retrieves a friend's current user status.
+        /// </summary>
+        /// <value>The user status of a friend.</value>
         public ToxUserStatus UserStatus
         {
             get
