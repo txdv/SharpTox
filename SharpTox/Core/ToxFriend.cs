@@ -169,6 +169,7 @@ namespace SharpTox.Core
         public bool Delete()
         {
             Tox.CheckDisposed();
+            Tox.DeleteFriend(this);
             return ToxFunctions.DelFriend(Tox.Handle, Number) == 0;
         }
 

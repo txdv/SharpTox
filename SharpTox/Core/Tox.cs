@@ -3,6 +3,7 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -143,6 +144,16 @@ namespace SharpTox.Core
                     return new int[0];
 
                 return friends;
+            }
+        }
+
+        public ToxFriend[] Friends
+        {
+            get
+            {
+                CheckDisposed();
+
+                return FriendList.Select(FriendFromFriendNumber).ToArray();
             }
         }
 
@@ -1084,9 +1095,25 @@ namespace SharpTox.Core
             return new ToxKey(ToxKeyType.Public, key);
         }
 
+        Dictionary<int, ToxFriend> friends = new Dictionary<int, ToxFriend>();
         private ToxFriend FriendFromFriendNumber(int friendNumber)
         {
-            return new ToxFriend(this, friendNumber);
+            ToxFriend friend;
+            if (friends.TryGetValue(friendNumber, out friend))
+            {
+                return friend;
+            }
+
+            friend = new ToxFriend(this, friendNumber);
+
+            friends[friendNumber] = friend;
+
+            return friend;
+        }
+
+        internal void DeleteFriend(ToxFriend friend)
+        {
+            friends.Remove(friend.Number);
         }
 
         #region Events
