@@ -29,7 +29,7 @@ namespace SharpTox.Core
 
                 ToxFunctions.GetName(Tox._tox, Number, name);
 
-                return ToxTools.RemoveNull(Encoding.UTF8.GetString(name, 0, name.Length));
+                return ToxTools.GetString(name);
             }
         }
 
