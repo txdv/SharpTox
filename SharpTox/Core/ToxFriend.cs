@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace SharpTox.Core
 {
@@ -13,11 +14,22 @@ namespace SharpTox.Core
             Number = friendNumber;
         }
 
+        /// <summary>
+        /// Returns the name of a ToxFriend.
+        /// </summary>
+        /// <value>The name of a ToxFriend.</value>
         public string Name
         {
             get
             {
-                return Tox.GetName(Number);
+                Tox.CheckDisposed();
+
+                int size = ToxFunctions.GetNameSize(Tox._tox, Number);
+                byte[] name = new byte[size];
+
+                ToxFunctions.GetName(Tox._tox, Number, name);
+
+                return ToxTools.RemoveNull(Encoding.UTF8.GetString(name, 0, name.Length));
             }
         }
 

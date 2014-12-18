@@ -49,7 +49,7 @@ namespace SharpTox.Core
         private ToxDelegates.CallbackAvatarInfoDelegate _onAvatarInfoCallback;
         #endregion
 
-        private ToxHandle _tox;
+        internal ToxHandle _tox;
         private CancellationTokenSource _cancelTokenSource = new CancellationTokenSource();
 
         private bool _running = false;
@@ -58,6 +58,12 @@ namespace SharpTox.Core
 
         private List<ToxDelegates.CallbackPacketDelegate> _lossyPacketHandlers = new List<ToxDelegates.CallbackPacketDelegate>();
         private List<ToxDelegates.CallbackPacketDelegate> _losslessPacketHandlers = new List<ToxDelegates.CallbackPacketDelegate>();
+
+        internal void CheckDisposed()
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(GetType().FullName);
+        }
 
         /// <summary>
         /// Options used for this instance of Tox.
@@ -606,24 +612,6 @@ namespace SharpTox.Core
                 throw new ObjectDisposedException(GetType().FullName);
 
             return ToxFunctions.FriendExists(_tox, friendNumber) != 0;
-        }
-
-        /// <summary>
-        /// Retrieves the name of a friendNumber.
-        /// </summary>
-        /// <param name="friendNumber"></param>
-        /// <returns></returns>
-        public string GetName(int friendNumber)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().FullName);
-
-            int size = ToxFunctions.GetNameSize(_tox, friendNumber);
-            byte[] name = new byte[size];
-
-            ToxFunctions.GetName(_tox, friendNumber, name);
-
-            return ToxTools.RemoveNull(Encoding.UTF8.GetString(name, 0, name.Length));
         }
 
         /// <summary>
