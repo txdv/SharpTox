@@ -278,5 +278,15 @@ namespace SharpTox.Core
             return ToxFunctions.SendLosslessPacket(Tox.Handle, Number, data, (uint)data.Length) == 0;
         }
 
+        internal void OnAvatarDataInvoke(ToxEventArgs.AvatarDataEventArgs e)
+        {
+            if (OnAvatarData != null)
+                OnAvatarData(this, e);
+        }
+
+        /// <summary>
+        /// Occurs when avatar data is received.
+        /// </summary>
+        public event EventHandler<ToxEventArgs.AvatarDataEventArgs> OnAvatarData;
     }
 }
