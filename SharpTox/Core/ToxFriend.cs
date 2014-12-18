@@ -24,10 +24,10 @@ namespace SharpTox.Core
             {
                 Tox.CheckDisposed();
 
-                int size = ToxFunctions.GetNameSize(Tox._tox, Number);
+                int size = ToxFunctions.GetNameSize(Tox.Handle, Number);
                 byte[] name = new byte[size];
 
-                ToxFunctions.GetName(Tox._tox, Number, name);
+                ToxFunctions.GetName(Tox.Handle, Number, name);
 
                 return ToxTools.GetString(name);
             }
