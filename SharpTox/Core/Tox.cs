@@ -1710,11 +1710,8 @@ namespace SharpTox.Core
                 {
                     _onAvatarDataCallback = (IntPtr tox, int friendNumber, byte format, byte[] hash, byte[] data, uint dataLength, IntPtr userData) =>
                     {
-                        var e = new ToxEventArgs.AvatarDataEventArgs(FriendFromFriendNumber(friendNumber), new ToxAvatar((ToxAvatarFormat)format, (byte[])data.Clone(), hash));
                         if (_onAvatarData != null)
-                            Invoker(_onAvatarData, this, e);
-
-                        FriendFromFriendNumber(friendNumber).OnAvatarDataInvoke(e);
+                            Invoker(_onAvatarData, this, new ToxEventArgs.AvatarDataEventArgs(FriendFromFriendNumber(friendNumber), new ToxAvatar((ToxAvatarFormat)format, (byte[])data.Clone(), hash)));
                     };
 
                     ToxFunctions.RegisterAvatarDataCallback(_tox, _onAvatarDataCallback, IntPtr.Zero);
