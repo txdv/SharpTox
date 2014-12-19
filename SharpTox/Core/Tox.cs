@@ -835,24 +835,6 @@ namespace SharpTox.Core
         }
 
         /// <summary>
-        /// Registers a handler for lossy packets starting with start_byte.
-        /// </summary>
-        /// <param name="friendNumber"></param>
-        /// <param name="startByte"></param>
-        /// <param name="callback"></param>
-        /// <returns></returns>
-        public bool RegisterLossyPacketHandler(int friendNumber, byte startByte, ToxDelegates.CallbackPacketDelegate callback)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().FullName);
-
-            if (startByte < 200 || startByte > 254)
-                throw new ArgumentException("start_byte is not in the 200-254 range.");
-
-            return ToxFunctions.RegisterLossyPacketCallback(_tox, friendNumber, startByte, callback, IntPtr.Zero) == 0;
-        }
-
-        /// <summary>
         /// Registers a handler for lossless packets starting with start_byte. These packets can be captured with <see cref="OnLosslessPacket"/>.
         /// </summary>
         /// <param name="friendNumber"></param>
@@ -877,24 +859,6 @@ namespace SharpTox.Core
             _losslessPacketHandlers.Add(del);
 
             return ToxFunctions.RegisterLosslessPacketCallback(_tox, friendNumber, startByte, del, IntPtr.Zero) == 0;
-        }
-
-        /// <summary>
-        /// Registers a handler for lossless packets starting with start_byte.
-        /// </summary>
-        /// <param name="friendNumber"></param>
-        /// <param name="startByte"></param>
-        /// <param name="callback"></param>
-        /// <returns></returns>
-        public bool RegisterLosslessPacketHandler(int friendNumber, byte startByte, ToxDelegates.CallbackPacketDelegate callback)
-        {
-            if (_disposed)
-                throw new ObjectDisposedException(GetType().FullName);
-
-            if (startByte < 160 || startByte > 191)
-                throw new ArgumentException("start_byte is not in the 160-191 range.");
-
-            return ToxFunctions.RegisterLosslessPacketCallback(_tox, friendNumber, startByte, callback, IntPtr.Zero) == 0;
         }
 
         /// <summary>
