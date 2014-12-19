@@ -1640,8 +1640,8 @@ namespace SharpTox.Core
                 {
                     _onAvatarInfoCallback = (IntPtr tox, int friendNumber, byte format, byte[] hash, IntPtr userData) =>
                     {
-                        if (_onAvatarInfo != null)
-                            Invoker(_onAvatarInfo, this, new ToxEventArgs.AvatarInfoEventArgs(FriendFromFriendNumber(friendNumber), (ToxAvatarFormat)format, hash));
+                        var e = new ToxEventArgs.AvatarInfoEventArgs(FriendFromFriendNumber(friendNumber), (ToxAvatarFormat)format, hash);
+                        _onAvatarInfo(this, e);
                     };
 
                     ToxFunctions.RegisterAvatarInfoCallback(_tox, _onAvatarInfoCallback, IntPtr.Zero);
@@ -1674,8 +1674,8 @@ namespace SharpTox.Core
                 {
                     _onAvatarDataCallback = (IntPtr tox, int friendNumber, byte format, byte[] hash, byte[] data, uint dataLength, IntPtr userData) =>
                     {
-                        if (_onAvatarData != null)
-                            Invoker(_onAvatarData, this, new ToxEventArgs.AvatarDataEventArgs(FriendFromFriendNumber(friendNumber), new ToxAvatar((ToxAvatarFormat)format, (byte[])data.Clone(), hash)));
+                       var e = new ToxEventArgs.AvatarDataEventArgs(FriendFromFriendNumber(friendNumber), new ToxAvatar((ToxAvatarFormat)format, (byte[])data.Clone(), hash));
+                       _onAvatarData(this, e);
                     };
 
                     ToxFunctions.RegisterAvatarDataCallback(_tox, _onAvatarDataCallback, IntPtr.Zero);
@@ -1708,8 +1708,8 @@ namespace SharpTox.Core
                 {
                     _onGroupTitleCallback = (IntPtr tox, int groupNumber, int peerNumber, byte[] title, byte length, IntPtr userData) =>
                     {
-                        if (_onGroupTitleChanged != null)
-                            Invoker(_onGroupTitleChanged, this, new ToxEventArgs.GroupTitleEventArgs(groupNumber, peerNumber, Encoding.UTF8.GetString(title, 0, length)));
+                        var e = new ToxEventArgs.GroupTitleEventArgs(groupNumber, peerNumber, Encoding.UTF8.GetString(title, 0, length));
+                        _onGroupTitleChanged(this, e);
                     };
 
                     ToxFunctions.RegisterGroupTitleCallback(_tox, _onGroupTitleCallback, IntPtr.Zero);
