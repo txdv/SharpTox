@@ -138,8 +138,6 @@ namespace SharpTox.Core
             }
         }
 
-        // TODO: Currently this is not save, since FriendFromFriendNumber
-        // always returns a new instance
         private bool userIsTyping;
 
         /// <summary>
