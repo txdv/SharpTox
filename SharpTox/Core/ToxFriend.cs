@@ -277,6 +277,5 @@ namespace SharpTox.Core
 
             return ToxFunctions.SendLosslessPacket(Tox.Handle, Number, data, (uint)data.Length) == 0;
         }
-
     }
 }
