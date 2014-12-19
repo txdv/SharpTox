@@ -19,11 +19,6 @@ namespace SharpTox.Core
     /// </summary>
     public class Tox : IDisposable
     {
-        /// <summary>
-        /// The invoke delegate to use when raising events.
-        /// </summary>
-        public InvokeDelegate Invoker { get; set; }
-
         #region Callback Delegates
         private ToxDelegates.CallbackFriendRequestDelegate _onFriendRequestCallback;
         private ToxDelegates.CallbackConnectionStatusDelegate _onConnectionStatusCallback;
@@ -313,7 +308,6 @@ namespace SharpTox.Core
                 throw new Exception("Could not create a new instance of toxav.");
 
             Options = options;
-            Invoker = DummyInvoker;
         }
 
         public void Dispose()
@@ -370,11 +364,6 @@ namespace SharpTox.Core
             OnLossyPacket = null;
             OnConnected = null;
             OnDisconnected = null;
-        }
-
-        private object DummyInvoker(Delegate method, params object[] p)
-        {
-            return method.DynamicInvoke(p);
         }
 
         /// <summary>
@@ -530,14 +519,14 @@ namespace SharpTox.Core
                     if (IsConnected && !_connected)
                     {
                         if (OnConnected != null)
-                            Invoker(OnConnected, this, new ToxEventArgs.ConnectionEventArgs(true));
+                            OnConnected(this, new ToxEventArgs.ConnectionEventArgs(true));
 
                         _connected = true;
                     }
                     else if (!IsConnected && _connected)
                     {
                         if (OnDisconnected != null)
-                            Invoker(OnDisconnected, this, new ToxEventArgs.ConnectionEventArgs(false));
+                            OnDisconnected(this, new ToxEventArgs.ConnectionEventArgs(false));
 
                         _connected = false;
                     }
@@ -824,7 +813,7 @@ namespace SharpTox.Core
             ToxDelegates.CallbackPacketDelegate del = ((IntPtr tox, int friendNum, byte[] data, uint length, IntPtr obj) =>
             {
                 if (OnLossyPacket != null)
-                    Invoker(OnLossyPacket, this, new ToxEventArgs.CustomPacketEventArgs(FriendFromFriendNumber(friendNum), data));
+                    OnLossyPacket(this, new ToxEventArgs.CustomPacketEventArgs(FriendFromFriendNumber(friendNum), data));
 
                 return 1;
 
@@ -851,7 +840,7 @@ namespace SharpTox.Core
             ToxDelegates.CallbackPacketDelegate del = ((IntPtr tox, int friendNum, byte[] data, uint length, IntPtr obj) =>
             {
                 if (OnLosslessPacket != null)
-                    Invoker(OnLosslessPacket, this, new ToxEventArgs.CustomPacketEventArgs(FriendFromFriendNumber(friendNum), data));
+                    OnLosslessPacket(this, new ToxEventArgs.CustomPacketEventArgs(FriendFromFriendNumber(friendNum), data));
 
                 return 1;
 
@@ -1094,8 +1083,8 @@ namespace SharpTox.Core
                 {
                     _onFriendRequestCallback = (IntPtr tox, byte[] publicKey, byte[] message, ushort length, IntPtr userData) =>
                     {
-                        if (_onFriendRequest != null)
-                            Invoker(_onFriendRequest, this, new ToxEventArgs.FriendRequestEventArgs(ToxTools.RemoveNull(ToxTools.HexBinToString(publicKey)), Encoding.UTF8.GetString(message, 0, length)));
+                        var e = new ToxEventArgs.FriendRequestEventArgs(ToxTools.RemoveNull(ToxTools.HexBinToString(publicKey)), Encoding.UTF8.GetString(message, 0, length));
+                        _onFriendRequest(this, e);
                     };
 
                     ToxFunctions.RegisterFriendRequestCallback(_tox, _onFriendRequestCallback, IntPtr.Zero);
@@ -1128,8 +1117,8 @@ namespace SharpTox.Core
                 {
                     _onConnectionStatusCallback = (IntPtr tox, int friendNumber, byte status, IntPtr userData) =>
                     {
-                        if (_onConnectionStatusChanged != null)
-                            Invoker(_onConnectionStatusChanged, this, new ToxEventArgs.ConnectionStatusEventArgs(FriendFromFriendNumber(friendNumber), (ToxFriendConnectionStatus)status));
+                        var e = new ToxEventArgs.ConnectionStatusEventArgs(FriendFromFriendNumber(friendNumber), (ToxFriendConnectionStatus)status);
+                        _onConnectionStatusChanged(this, e);
                     };
 
                     ToxFunctions.RegisterConnectionStatusCallback(_tox, _onConnectionStatusCallback, IntPtr.Zero);
@@ -1162,8 +1151,8 @@ namespace SharpTox.Core
                 {
                     _onFriendMessageCallback = (IntPtr tox, int friendNumber, byte[] message, ushort length, IntPtr userData) =>
                     {
-                        if (_onFriendMessage != null)
-                            Invoker(_onFriendMessage, this, new ToxEventArgs.FriendMessageEventArgs(FriendFromFriendNumber(friendNumber), ToxTools.RemoveNull(Encoding.UTF8.GetString(message, 0, length))));
+                        var e = new ToxEventArgs.FriendMessageEventArgs(FriendFromFriendNumber(friendNumber), ToxTools.GetString(message));
+                        _onFriendMessage(this, e);
                     };
 
                     ToxFunctions.RegisterFriendMessageCallback(_tox, _onFriendMessageCallback, IntPtr.Zero);
@@ -1196,8 +1185,8 @@ namespace SharpTox.Core
                 {
                     _onFriendActionCallback = (IntPtr tox, int friendNumber, byte[] action, ushort length, IntPtr userData) =>
                     {
-                        if (_onFriendAction != null)
-                            Invoker(_onFriendAction, this, new ToxEventArgs.FriendActionEventArgs(FriendFromFriendNumber(friendNumber), ToxTools.GetString(action)));
+                        var e = new ToxEventArgs.FriendActionEventArgs(FriendFromFriendNumber(friendNumber), ToxTools.GetString(action));
+                        _onFriendAction(this, e);
                     };
 
                     ToxFunctions.RegisterFriendActionCallback(_tox, _onFriendActionCallback, IntPtr.Zero);
@@ -1230,8 +1219,8 @@ namespace SharpTox.Core
                 {
                     _onNameChangeCallback = (IntPtr tox, int friendNumber, byte[] newName, ushort length, IntPtr userData) =>
                     {
-                        if (_onNameChange != null)
-                            Invoker(_onNameChange, this, new ToxEventArgs.NameChangeEventArgs(FriendFromFriendNumber(friendNumber), ToxTools.GetString(newName)));
+                        var e = new ToxEventArgs.NameChangeEventArgs(FriendFromFriendNumber(friendNumber), ToxTools.GetString(newName));
+                        _onNameChange(this, e);
                     };
 
                     ToxFunctions.RegisterNameChangeCallback(_tox, _onNameChangeCallback, IntPtr.Zero);
@@ -1264,8 +1253,8 @@ namespace SharpTox.Core
                 {
                     _onStatusMessageCallback = (IntPtr tox, int friendNumber, byte[] newStatus, ushort length, IntPtr userData) =>
                     {
-                        if (_onStatusMessage != null)
-                            Invoker(_onStatusMessage, this, new ToxEventArgs.StatusMessageEventArgs(FriendFromFriendNumber(friendNumber), ToxTools.RemoveNull(Encoding.UTF8.GetString(newStatus, 0, length))));
+                        var e = new ToxEventArgs.StatusMessageEventArgs(FriendFromFriendNumber(friendNumber), ToxTools.GetString(newStatus));
+                        _onStatusMessage(this, e);
                     };
 
                     ToxFunctions.RegisterStatusMessageCallback(_tox, _onStatusMessageCallback, IntPtr.Zero);
@@ -1298,8 +1287,8 @@ namespace SharpTox.Core
                 {
                     _onUserStatusCallback = (IntPtr tox, int friendNumber, ToxUserStatus status, IntPtr userData) =>
                     {
-                        if (_onUserStatus != null)
-                            Invoker(_onUserStatus, this, new ToxEventArgs.UserStatusEventArgs(FriendFromFriendNumber(friendNumber), status));
+                        var e = new ToxEventArgs.UserStatusEventArgs(FriendFromFriendNumber(friendNumber), status);
+                        _onUserStatus(this, e);
                     };
 
                     ToxFunctions.RegisterUserStatusCallback(_tox, _onUserStatusCallback, IntPtr.Zero);
@@ -1334,8 +1323,8 @@ namespace SharpTox.Core
                     {
                         bool isTyping = typing != 0;
 
-                        if (_onTypingChange != null)
-                            Invoker(_onTypingChange, this, new ToxEventArgs.TypingStatusEventArgs(FriendFromFriendNumber(friendNumber), isTyping));
+                        var e = new ToxEventArgs.TypingStatusEventArgs(FriendFromFriendNumber(friendNumber), isTyping);
+                       _onTypingChange(this, e);
                     };
 
                     ToxFunctions.RegisterTypingChangeCallback(_tox, _onTypingChangeCallback, IntPtr.Zero);
@@ -1368,8 +1357,8 @@ namespace SharpTox.Core
                 {
                     _onGroupActionCallback = (IntPtr tox, int groupNumber, int peerNumber, byte[] action, ushort length, IntPtr userData) =>
                     {
-                        if (_onGroupAction != null)
-                            Invoker(_onGroupAction, this, new ToxEventArgs.GroupActionEventArgs(groupNumber, peerNumber, ToxTools.GetString(action)));
+                        var e = new ToxEventArgs.GroupActionEventArgs(groupNumber, peerNumber, ToxTools.GetString(action));
+                        _onGroupAction(this, e);
                     };
 
                     ToxFunctions.RegisterGroupActionCallback(_tox, _onGroupActionCallback, IntPtr.Zero);
@@ -1402,8 +1391,8 @@ namespace SharpTox.Core
                 {
                     _onGroupMessageCallback = (IntPtr tox, int groupNumber, int peerNumber, byte[] message, ushort length, IntPtr userData) =>
                     {
-                        if (_onGroupMessage != null)
-                            Invoker(_onGroupMessage, this, new ToxEventArgs.GroupMessageEventArgs(groupNumber, peerNumber, ToxTools.GetString(message)));
+                        var e = new ToxEventArgs.GroupMessageEventArgs(groupNumber, peerNumber, ToxTools.GetString(message));
+                        _onGroupMessage(this, e);
                     };
 
                     ToxFunctions.RegisterGroupMessageCallback(_tox, _onGroupMessageCallback, IntPtr.Zero);
@@ -1436,8 +1425,8 @@ namespace SharpTox.Core
                 {
                     _onGroupInviteCallback = (IntPtr tox, int friendNumber, byte type, byte[] data, ushort length, IntPtr userData) =>
                     {
-                        if (_onGroupInvite != null)
-                            Invoker(_onGroupInvite, this, new ToxEventArgs.GroupInviteEventArgs(FriendFromFriendNumber(friendNumber), (ToxGroupType)type, data));
+                        var e = new ToxEventArgs.GroupInviteEventArgs(FriendFromFriendNumber(friendNumber), (ToxGroupType)type, data);
+                        _onGroupInvite(this, e);
                     };
 
                     ToxFunctions.RegisterGroupInviteCallback(_tox, _onGroupInviteCallback, IntPtr.Zero);
@@ -1470,8 +1459,8 @@ namespace SharpTox.Core
                 {
                     _onGroupNamelistChangeCallback = (IntPtr tox, int groupNumber, int peerNumber, ToxChatChange change, IntPtr userData) =>
                     {
-                        if (_onGroupNamelistChange != null)
-                            Invoker(_onGroupNamelistChange, this, new ToxEventArgs.GroupNamelistChangeEventArgs(groupNumber, peerNumber, change));
+                        var e = new ToxEventArgs.GroupNamelistChangeEventArgs(groupNumber, peerNumber, change);
+                        _onGroupNamelistChange(this, e);
                     };
 
                     ToxFunctions.RegisterGroupNamelistChangeCallback(_tox, _onGroupNamelistChangeCallback, IntPtr.Zero);
@@ -1504,8 +1493,8 @@ namespace SharpTox.Core
                 {
                     _onFileControlCallback = (IntPtr tox, int friendNumber, byte receiveSend, byte fileNumber, byte controlYype, byte[] data, ushort length, IntPtr userData) =>
                     {
-                        if (_onFileControl != null)
-                            Invoker(_onFileControl, this, new ToxEventArgs.FileControlEventArgs(FriendFromFriendNumber(friendNumber), fileNumber, receiveSend == 1, (ToxFileControl)controlYype, data));
+                        var e = new ToxEventArgs.FileControlEventArgs(FriendFromFriendNumber(friendNumber), fileNumber, receiveSend == 1, (ToxFileControl)controlYype, data);
+                        _onFileControl(this, e);
                     };
 
                     ToxFunctions.RegisterFileControlCallback(_tox, _onFileControlCallback, IntPtr.Zero);
@@ -1538,8 +1527,8 @@ namespace SharpTox.Core
                 {
                     _onFileDataCallback = (IntPtr tox, int friendNumber, byte fileNumber, byte[] data, ushort length, IntPtr userData) =>
                     {
-                        if (_onFileData != null)
-                            Invoker(_onFileData, this, new ToxEventArgs.FileDataEventArgs(FriendFromFriendNumber(friendNumber), fileNumber, data));
+                        var e = new ToxEventArgs.FileDataEventArgs(FriendFromFriendNumber(friendNumber), fileNumber, data);
+                        _onFileData(this, e);
                     };
 
                     ToxFunctions.RegisterFileDataCallback(_tox, _onFileDataCallback, IntPtr.Zero);
@@ -1572,8 +1561,8 @@ namespace SharpTox.Core
                 {
                     _onFileSendRequestCallback = (IntPtr tox, int friendNumber, byte fileNumber, ulong fileSize, byte[] filename, ushort filenameLength, IntPtr userData) =>
                     {
-                        if (_onFileSendRequest != null)
-                            Invoker(_onFileSendRequest, this, new ToxEventArgs.FileSendRequestEventArgs(FriendFromFriendNumber(friendNumber), fileNumber, fileSize, ToxTools.GetString(filename)));
+                        var e = new ToxEventArgs.FileSendRequestEventArgs(FriendFromFriendNumber(friendNumber), fileNumber, fileSize, ToxTools.GetString(filename));
+                        _onFileSendRequest(this, e);
                     };
 
                     ToxFunctions.RegisterFileSendRequestCallback(_tox, _onFileSendRequestCallback, IntPtr.Zero);
@@ -1606,8 +1595,8 @@ namespace SharpTox.Core
                 {
                     _onReadReceiptCallback = (IntPtr tox, int friendNumber, uint receipt, IntPtr userData) =>
                     {
-                        if (_onReadReceipt != null)
-                            Invoker(_onReadReceipt, this, new ToxEventArgs.ReadReceiptEventArgs(FriendFromFriendNumber(friendNumber), (int)receipt));
+                        var e = new ToxEventArgs.ReadReceiptEventArgs(FriendFromFriendNumber(friendNumber), (int)receipt);
+                        _onReadReceipt(this, e);
                     };
 
                     ToxFunctions.RegisterReadReceiptCallback(_tox, _onReadReceiptCallback, IntPtr.Zero);
